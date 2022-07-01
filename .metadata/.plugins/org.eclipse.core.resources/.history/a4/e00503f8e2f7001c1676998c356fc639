@@ -1,0 +1,89 @@
+package com.example.drogaria.controller;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.example.drogaria.domain.Categoria;
+import com.example.drogaria.exception.RecursoNaoEncontradoException;
+import com.example.drogaria.repository.CategoriaRepository;
+import com.example.drogaria.service.CategoriaService;
+
+@RestController
+@RequestMapping("categorias")
+public class CategoriaController {
+
+	@Autowired
+	private CategoriaService categoriaService;
+	 
+	@CrossOrigin
+	@GetMapping("/{codigo}")
+	public Categoria buscarPorCodigo(@PathVariable Short codigo) {
+		try {
+			Categoria categoria = categoriaService.buscarPorCodigo(codigo);
+			return categoria;
+		} catch (RecursoNaoEncontradoException erro) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria não encontrada", erro);
+            
+		}
+	}
+	
+
+	@Autowired
+    private CategoriaRepository categoriaRepository;
+	
+	@CrossOrigin
+	@GetMapping
+	public List<Categoria> listar() {
+		List<Categoria> categorias = categoriaService.listar();
+		return categorias;
+	}
+	
+//  Buscar direto sem usar classe propria (.Service)
+//	@GetMapping("/{codigo}")
+//	public Categoria buscar(@PathVariable Short codigo) {
+//		Optional<Categoria> resultado = categoriaRepository.findById(codigo);
+//		Categoria categoria = resultado.get(); 
+//		return categoria;
+//	}
+	
+//  Inserir direto sem usar classe propria (.Service)
+//	@PostMapping
+//	public Categoria inserir(@RequestBody Categoria categoria) {
+//		Categoria categoriaSalva = categoriaRepository.save(categoria);
+//		return categoriaSalva;		
+//	}
+    
+//  Excluir direto sem usar classe propria (.Service) 
+	@CrossOrigin
+	@DeleteMapping("/{codigo}")
+	public Categoria excluir(@PathVariable Short codigo) {
+		Optional<Categoria> categoria = categoriaRepository.findById(codigo);
+		categoriaRepository.delete(categoria.get());
+		Categoria categoriaRetorno = categoria.get();
+		return categoriaRetorno;	
+
+	}
+	
+	@CrossOrigin
+	@PutMapping
+	public Categoria editar(@RequestBody Categoria categoria) {
+		Categoria categoriaEditada = categoriaRepository.save(categoria);
+		return categoriaEditada;
+	}
+	
+	
+	
+}
